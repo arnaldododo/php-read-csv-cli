@@ -1,0 +1,12 @@
+{
+    "name": "muhammadarnaldo/php-read-csv-cli",
+    "description": "CLI script that reads csv file and store the data to the PostgreSQL",
+    "require": {
+        "doctrine/dbal": "^4.2"
+    },
+    "authors": [
+        {
+            "name": "Muhammad Arnaldo"
+        }
+    ]
+}
