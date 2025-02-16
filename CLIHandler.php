@@ -4,6 +4,9 @@
  * CLIHandler.php - CLIHandler class
  * This file manages CLI's input ouput.
  */
+
+require_once __DIR__ . '/FileHandler.php';
+
 class CLIHandler
 {
     public function __construct(
@@ -16,6 +19,21 @@ class CLIHandler
             $this->showHelp();
             return;
         }
+
+        if (isset($this->options['file'])) {
+            if (isset($this->options['dry_run'])) {
+                echo "Start parsing the file: {$this->options['file']}\n\n";
+
+                $fileHandler = new FileHandler($this->options['file']);
+                $data = $fileHandler->parseCsv();
+                $fileHandler->printData($data);
+
+                echo "\nDry run complete. No data was inserted into the database.\n";
+                return;
+            }
+        }
+
+        echo "Invalid command. Use --help for more information." . PHP_EOL;
     }
 
     private function showHelp()
