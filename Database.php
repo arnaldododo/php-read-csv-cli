@@ -63,7 +63,7 @@ class Database
     {
         $sql = "DROP TABLE IF EXISTS users;
         CREATE TABLE users (
-            id SERIAL PRIMARY KEaY,
+            id SERIAL PRIMARY KEY,
             name VARCHAR(100) NOT NULL,
             surname VARCHAR(100) NOT NULL,
             email VARCHAR(100) NOT NULL UNIQUE
@@ -74,6 +74,37 @@ class Database
             echo "Users table created successfully.\n";
         } catch (Exception $e) {
             die("An error occured. Failed to create the users table.\n");
+        }
+    }
+
+    /**
+     * Insert a user into the database.
+     * 
+     * @param array $data The user data.
+     */
+    public function insertUser(array $data)
+    {
+        foreach ($data as $user) {
+            try {
+                $qb = $this->connection->createQueryBuilder();
+
+                $qb->insert('users')
+                    ->setValue('name', ':name')
+                    ->setValue('surname', ':surname')
+                    ->setValue('email', ':email')
+                    ->setParameter('name', $user[0])
+                    ->setParameter('surname', $user[1])
+                    ->setParameter('email', $user[2]);
+
+                $qb->executeStatement();
+                echo "User inserted successfully.\n";
+            } catch (Exception $e) {
+                if (strpos($e->getMessage(), '23505') !== false) {
+                    echo "Skipping duplicate email: {$user[2]}\n";
+                    continue;
+                }
+                die("An error occurred. Failed to insert users {$e}\n");
+            }
         }
     }
 }

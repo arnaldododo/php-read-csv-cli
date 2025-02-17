@@ -45,6 +45,20 @@ class CLIHandler
                 echo "\nDry run complete. No data was inserted into the database.\n";
                 return;
             }
+
+            if (isset($this->options['u']) && isset($this->options['h'])) {
+                $fileHandler = new FileHandler($this->options['file']);
+                $data = $fileHandler->parseCsv();
+
+                echo "Inserting users data...\n";
+                $database = new Database(
+                    $this->options['u'],
+                    !empty($this->options['p']) ? $this->options['p'] : '',
+                    $this->options['h']
+                );
+                $database->insertUser($data);
+                return;
+            }
         }
 
         echo "Invalid command. Use --help for more information." . PHP_EOL;
