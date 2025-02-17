@@ -52,11 +52,12 @@ class FileHandler
             $row[1] = $this->cleanName($row[1]);
             $temp = $row[2];
             if (!$row[2] = $this->cleanEmail($row[2])) {
-                echo $temp . " is not a valid email address. Skipping this entry.\n\n";
+                echo $temp . " is not a valid email address. Skipping this entry.\n";
                 continue;
             }
             $preprocessedData[] = $row;
         }
+        echo PHP_EOL;
         return $preprocessedData;
     }
 
