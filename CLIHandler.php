@@ -25,52 +25,80 @@ class CLIHandler
      */
     public function run()
     {
-        if (isset($this->options['help'])) {
-            $this->showHelp();
+        try {
+            if (isset($this->options['help'])) {
+                $this->showHelp();
+                return;
+            }
+
+            if (isset($this->options['create_table'])) {
+                $this->handleCreateTable();
+                return;
+            }
+
+            if (isset($this->options['file'])) {
+                $this->handleFileProcessing();
+                return;
+            }
+
+            echo "Invalid command. Use --help for more information." . PHP_EOL;
+        } catch (Exception $e) {
+            echo "An error occured." . PHP_EOL;
+        }
+    }
+
+    /**
+     * Create the users table.
+     */
+    private function handleCreateTable()
+    {
+        list($user, $password, $host) = $this->getDbCredentials();
+
+        echo "Creating users table...\n";
+        $database = new Database($user, $password, $host);
+        $database->createTable();
+    }
+
+    /**
+     * Handle file processing, parsing and inserting to the database.
+     */
+    private function handleFileProcessing()
+    {
+        $file = $this->options['file'];
+
+        $fileHandler = new FileHandler($file);
+        $data = $fileHandler->parseCsv();
+
+        if (isset($this->options['dry_run'])) {
+            echo "Dry run mode: Parsed data from file '{$file}':\n\n";
+            $fileHandler->printData($data);
+            echo "\nDry run complete. No data was inserted into the database.\n";
             return;
         }
 
-        if (isset($this->options['create_table'])) {
-            if (isset($this->options['u']) && isset($this->options['h'])) {
-                echo "Creating users table...\n";
-                $database = new Database(
-                    $this->options['u'],
-                    !empty($this->options['p']) ? $this->options['p'] : '',
-                    $this->options['h']
-                );
-                $database->createTable();
-                return;
-            }
+        list($user, $password, $host) = $this->getDbCredentials();
+
+        echo "Inserting users data...\n";
+        $database = new Database($user, $password, $host);
+        $database->insertUser($data);
+    }
+
+    /**
+     * Retrieve and validate database credentials from CLI options
+     *
+     * @return array The database credentials.
+     */
+    private function getDbCredentials()
+    {
+        $user = $this->options['u'] ?? null;
+        $host = $this->options['h'] ?? null;
+        $password = $this->options['p'] ?? '';
+
+        if (!$user || !$host) {
+            die("Database username (-u) and host (-h) are required. Use --help for more information.\n");
         }
 
-        if (isset($this->options['file'])) {
-            if (isset($this->options['dry_run'])) {
-                echo "Start parsing the file: {$this->options['file']}\n\n";
-
-                $fileHandler = new FileHandler($this->options['file']);
-                $data = $fileHandler->parseCsv();
-                $fileHandler->printData($data);
-
-                echo "\nDry run complete. No data was inserted into the database.\n";
-                return;
-            }
-
-            if (isset($this->options['u']) && isset($this->options['h'])) {
-                $fileHandler = new FileHandler($this->options['file']);
-                $data = $fileHandler->parseCsv();
-
-                echo "Inserting users data...\n";
-                $database = new Database(
-                    $this->options['u'],
-                    !empty($this->options['p']) ? $this->options['p'] : '',
-                    $this->options['h']
-                );
-                $database->insertUser($data);
-                return;
-            }
-        }
-
-        echo "Invalid command. Use --help for more information." . PHP_EOL;
+        return [$user, $password, $host];
     }
 
     /**
