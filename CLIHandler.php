@@ -6,6 +6,7 @@
  */
 
 require_once __DIR__ . '/FileHandler.php';
+require_once __DIR__ . '/Database.php';
 
 class CLIHandler
 {
@@ -20,6 +21,19 @@ class CLIHandler
             return;
         }
 
+        if (isset($this->options['create_table'])) {
+            if (isset($this->options['u']) && isset($this->options['h'])) {
+                echo "Creating users table...\n";
+                $database = new Database(
+                    $this->options['u'],
+                    !empty($this->options['p']) ? $this->options['p'] : '',
+                    $this->options['h']
+                );
+                $database->createTable();
+                return;
+            }
+        }
+
         if (isset($this->options['file'])) {
             if (isset($this->options['dry_run'])) {
                 echo "Start parsing the file: {$this->options['file']}\n\n";
@@ -29,6 +43,20 @@ class CLIHandler
                 $fileHandler->printData($data);
 
                 echo "\nDry run complete. No data was inserted into the database.\n";
+                return;
+            }
+
+            if (isset($this->options['u']) && isset($this->options['h'])) {
+                $fileHandler = new FileHandler($this->options['file']);
+                $data = $fileHandler->parseCsv();
+
+                echo "Inserting users data...\n";
+                $database = new Database(
+                    $this->options['u'],
+                    !empty($this->options['p']) ? $this->options['p'] : '',
+                    $this->options['h']
+                );
+                $database->insertUser($data);
                 return;
             }
         }
