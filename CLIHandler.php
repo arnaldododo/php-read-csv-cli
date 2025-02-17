@@ -6,6 +6,7 @@
  */
 
 require_once __DIR__ . '/FileHandler.php';
+require_once __DIR__ . '/Database.php';
 
 class CLIHandler
 {
@@ -18,6 +19,19 @@ class CLIHandler
         if (isset($this->options['help'])) {
             $this->showHelp();
             return;
+        }
+
+        if (isset($this->options['create_table'])) {
+            if (isset($this->options['u']) && isset($this->options['h'])) {
+                echo "Creating users table...\n";
+                $database = new Database(
+                    $this->options['u'],
+                    !empty($this->options['p']) ? $this->options['p'] : '',
+                    $this->options['h']
+                );
+                $database->createTable();
+                return;
+            }
         }
 
         if (isset($this->options['file'])) {
