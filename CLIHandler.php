@@ -1,5 +1,5 @@
-
 <?php
+
 /**
  * CLIHandler.php - CLIHandler class
  * This file manages CLI's input ouput.
@@ -10,10 +10,19 @@ require_once __DIR__ . '/Database.php';
 
 class CLIHandler
 {
+    /**
+     * Constructor for the class.
+     *
+     * @param array $options CLI input.
+     */
     public function __construct(
         private array $options
     ) {}
 
+    /**
+     * Run the CLI command.
+     * Contains the logic to handle the CLI input.
+     */
     public function run()
     {
         if (isset($this->options['help'])) {
@@ -64,6 +73,9 @@ class CLIHandler
         echo "Invalid command. Use --help for more information." . PHP_EOL;
     }
 
+    /**
+     * Show the help message.
+     */
     private function showHelp()
     {
         $helpMessage = <<<HELP
